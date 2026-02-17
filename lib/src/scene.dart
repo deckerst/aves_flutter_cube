@@ -1,19 +1,16 @@
-import 'dart:ui';
 import 'dart:typed_data';
+import 'dart:ui';
+
 import 'package:flutter_cube/flutter_cube.dart';
-import 'package:vector_math/vector_math_64.dart';
-import 'object.dart';
-import 'camera.dart';
-import 'mesh.dart';
-import 'material.dart';
+
 import 'light.dart';
 
 typedef ObjectCreatedCallback = void Function(Object object);
 
 class Scene {
   Scene({VoidCallback? onUpdate, ObjectCreatedCallback? onObjectCreated}) {
-    this._onUpdate = onUpdate;
-    this._onObjectCreated = onObjectCreated;
+    _onUpdate = onUpdate;
+    _onObjectCreated = onObjectCreated;
     world = Object(scene: this);
   }
 
@@ -182,7 +179,7 @@ class Scene {
       final List<Color> colors = o.mesh.colors;
       final int colorCount = o.mesh.vertices.length;
       if (colorCount != o.mesh.colors.length) {
-        final int colorValue = (o.mesh.texture != null) ? Color.fromARGB(0, 0, 0, 0).value : toColor(o.mesh.material.diffuse, o.mesh.material.opacity).value;
+        final int colorValue = (o.mesh.texture != null) ? const Color.fromARGB(0, 0, 0, 0).value : toColor(o.mesh.material.diffuse, o.mesh.material.opacity).value;
         for (int i = 0; i < colorCount; i++) {
           renderColors[vertexOffset + i] = colorValue;
         }
@@ -254,10 +251,10 @@ class Scene {
       final Polygon? p = rawIndices[i];
       if (p != null) renderIndices.add(p);
     }
-    if (renderIndices.length == 0) return;
+    if (renderIndices.isEmpty) return;
 
     // sort the faces by z
-    renderIndices.sort((Polygon a, Polygon b) {
+    renderIndices.sort((a, b) {
       // return b.sumOfZ.compareTo(a.sumOfZ);
       final double az = a.sumOfZ;
       final double bz = b.sumOfZ;
@@ -289,7 +286,7 @@ class Scene {
 
     final paint = Paint();
     if (renderMesh.texture != null) {
-      Float64List matrix4 = new Matrix4.identity().storage;
+      Float64List matrix4 = Matrix4.identity().storage;
       final shader = ImageShader(renderMesh.texture!, TileMode.mirror, TileMode.mirror, matrix4);
       paint.shader = shader;
     }

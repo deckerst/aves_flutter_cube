@@ -1,33 +1,35 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_cube/flutter_cube.dart';
 
-void main() => runApp(MyApp());
+void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Cube',
       theme: ThemeData.dark(),
-      home: MyHomePage(title: 'Flutter Cube Home Page'),
+      home: const MyHomePage(title: 'Flutter Cube Home Page'),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  MyHomePage({Key? key, this.title}) : super(key: key);
+  const MyHomePage({super.key, this.title});
 
   final String? title;
 
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  State<MyHomePage> createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateMixin {
   late Scene _scene;
   Object? _bunny;
   late AnimationController _controller;
-  double _ambient = 0.1;
+  final double _ambient = 0.1;
   double _diffuse = 0.8;
   double _specular = 0.5;
   double _shininess = 0.0;
@@ -44,7 +46,7 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(duration: Duration(milliseconds: 30000), vsync: this)
+    _controller = AnimationController(duration: const Duration(milliseconds: 30000), vsync: this)
       ..addListener(() {
         if (_bunny != null) {
           _bunny!.rotation.y = _controller.value * 360;
@@ -76,7 +78,7 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: <Widget>[
-                  Flexible(flex: 2, child: Text('diffuse')),
+                  const Flexible(flex: 2, child: Text('diffuse')),
                   Flexible(
                     flex: 8,
                     child: Slider(
@@ -97,7 +99,7 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: <Widget>[
-                  Flexible(flex: 2, child: Text('specular')),
+                  const Flexible(flex: 2, child: Text('specular')),
                   Flexible(
                     flex: 8,
                     child: Slider(
@@ -118,7 +120,7 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: <Widget>[
-                  Flexible(flex: 2, child: Text('shininess')),
+                  const Flexible(flex: 2, child: Text('shininess')),
                   Flexible(
                     flex: 8,
                     child: Slider(

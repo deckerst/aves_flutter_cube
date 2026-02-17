@@ -26,10 +26,11 @@ class Polygon {
 
 // wolcy97: 2020-01-31
 int _getVertexIndex(String vIndex) {
-  if (int.parse(vIndex) < 0)
+  if (int.parse(vIndex) < 0) {
     return int.parse(vIndex) + 1;
-  else
+  } else {
     return int.parse(vIndex) - 1;
+  }
 }
 
 class Mesh {
@@ -69,7 +70,7 @@ Future<List<Mesh>> loadObj(String fileName, bool normalized, {bool isAsset = tru
   String? groupName;
   String basePath = path.dirname(fileName);
 
-  var data;
+  String data;
   if (isAsset) {
     // load obj data from asset.
     data = await rootBundle.loadString(fileName);
@@ -79,7 +80,7 @@ Future<List<Mesh>> loadObj(String fileName, bool normalized, {bool isAsset = tru
   }
   final lines = data.split('\n');
   for (var line in lines) {
-    List<String> parts = line.trim().split(RegExp(r"\s+"));
+    List<String> parts = line.trim().split(RegExp(r'\s+'));
 
     switch (parts[0]) {
       case 'mtllib':
@@ -178,7 +179,7 @@ Future<List<Mesh>> _buildMesh(
   String basePath,
   bool isAsset,
 ) async {
-  if (elementOffsets.length == 0) {
+  if (elementOffsets.isEmpty) {
     elementNames.add('');
     elementMaterials.add('');
     elementOffsets.add(0);
@@ -349,22 +350,22 @@ List<Mesh> normalizeMesh(List<Mesh> meshes) {
 Future<Image?> packingTexture(List<Mesh> meshes) async {
   // generate a key for a mesh.
   String getMeshKey(Mesh mesh) {
-    if (mesh.texture != null) return mesh.texturePath ?? '' + mesh.textureRect.toString();
+    if (mesh.texture != null) return mesh.texturePath ?? '${mesh.textureRect}';
     return toColor(mesh.material.diffuse.bgr).toString();
   }
 
   // only pack the different textures.
   final allMeshes = meshes;
-  final textures = Map<String, Mesh>();
+  final textures = <String, Mesh>{};
   for (Mesh mesh in allMeshes) {
-    if (mesh.vertices.length == 0) continue;
+    if (mesh.vertices.isEmpty) continue;
     final String key = getMeshKey(mesh);
     textures.putIfAbsent(key, () => mesh);
   }
   // if there is only one texture then return the texture directly.
   meshes = textures.values.toList();
   if (meshes.length == 1) return meshes[0].texture;
-  if (meshes.length == 0) return null;
+  if (meshes.isEmpty) return null;
 
   // packing
   double area = 0;
@@ -373,7 +374,7 @@ Future<Image?> packingTexture(List<Mesh> meshes) async {
     area += mesh.textureRect.width * mesh.textureRect.height;
     maxWidth = math.max(maxWidth, mesh.textureRect.width);
   }
-  meshes.sort((Mesh a, Mesh b) => b.textureRect.height.compareTo(a.textureRect.height));
+  meshes.sort((a, b) => b.textureRect.height.compareTo(a.textureRect.height));
 
   final double startWidth = math.max(math.sqrt(area / 0.95), maxWidth);
   final List<Rect> spaces = <Rect>[];
@@ -422,7 +423,7 @@ Future<Image?> packingTexture(List<Mesh> meshes) async {
       final int length = imageWidth * imageHeight;
       pixels = Uint32List(length);
       // color mode then set texture to transparent.
-      final int color = 0; //mesh.material == null ? 0 : toColor(mesh.material.kd.bgr, mesh.material.d).value;
+      const int color = 0; //mesh.material == null ? 0 : toColor(mesh.material.kd.bgr, mesh.material.d).value;
       for (int i = 0; i < length; i++) {
         pixels[i] = color;
       }
@@ -445,16 +446,12 @@ Future<Image?> packingTexture(List<Mesh> meshes) async {
 
   // apply the packed textureRect to all meshes.
   for (Mesh mesh in allMeshes) {
-    final String? key = getMeshKey(mesh);
-    if (key != null) {
-      final Rect? rect = textures[key]?.textureRect;
-      if (rect != null) mesh.textureRect = rect;
+    final String key = getMeshKey(mesh);
+    final Rect? rect = textures[key]?.textureRect;
+    if (rect != null) mesh.textureRect = rect;
     }
-  }
 
   final c = Completer<Image>();
-  decodeImageFromPixels(texture.buffer.asUint8List(), textureWidth, textureHeight, PixelFormat.rgba8888, (image) {
-    c.complete(image);
-  });
+  decodeImageFromPixels(texture.buffer.asUint8List(), textureWidth, textureHeight, PixelFormat.rgba8888, c.complete);
   return c.future;
 }

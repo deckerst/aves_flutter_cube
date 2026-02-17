@@ -1,28 +1,31 @@
 import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_cube/flutter_cube.dart';
 
-void main() => runApp(MyApp());
+void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Cube',
       theme: ThemeData.dark(),
-      home: MyHomePage(title: 'Flutter Cube Home Page'),
+      home: const MyHomePage(title: 'Flutter Cube Home Page'),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  MyHomePage({Key? key, this.title}) : super(key: key);
+  const MyHomePage({super.key, this.title});
 
   final String? title;
 
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  State<MyHomePage> createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateMixin {
@@ -34,9 +37,9 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
     _scene = scene;
     scene.camera.position.z = 50;
     _cube = Object(scale: Vector3(2.0, 2.0, 2.0), backfaceCulling: false, fileName: 'assets/cube/cube.obj');
-    final int samples = 100;
-    final double radius = 8;
-    final double offset = 2 / samples;
+    const int samples = 100;
+    const double radius = 8;
+    const double offset = 2 / samples;
     final double increment = pi * (3 - sqrt(5));
     for (var i = 0; i < samples; i++) {
       final y = (i * offset - 1) + offset / 2;
@@ -56,7 +59,7 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(duration: Duration(milliseconds: 30000), vsync: this)
+    _controller = AnimationController(duration: const Duration(milliseconds: 30000), vsync: this)
       ..addListener(() {
         if (_cube != null) {
           _cube!.rotation.y = _controller.value * 360;

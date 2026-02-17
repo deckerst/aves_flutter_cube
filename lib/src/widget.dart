@@ -1,24 +1,24 @@
-import 'dart:ui';
 import 'package:flutter/widgets.dart' hide Image;
 import 'package:vector_math/vector_math_64.dart';
+
 import 'scene.dart';
 
-typedef void SceneCreatedCallback(Scene scene);
+typedef SceneCreatedCallback = void Function(Scene scene);
 
 class Cube extends StatefulWidget {
-  Cube({
-    Key? key,
+  const Cube({
+    super.key,
     this.interactive = true,
     this.onSceneCreated,
     this.onObjectCreated,
-  }) : super(key: key);
+  });
 
   final bool interactive;
   final SceneCreatedCallback? onSceneCreated;
   final ObjectCreatedCallback? onObjectCreated;
 
   @override
-  _CubeState createState() => _CubeState();
+  State<Cube> createState() => _CubeState();
 }
 
 class _CubeState extends State<Cube> {
@@ -50,33 +50,36 @@ class _CubeState extends State<Cube> {
       onObjectCreated: widget.onObjectCreated,
     );
     // prevent setState() or markNeedsBuild called during build
-    WidgetsBinding.instance?.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       widget.onSceneCreated?.call(scene);
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
-      scene.camera.viewportWidth = constraints.maxWidth;
-      scene.camera.viewportHeight = constraints.maxHeight;
-      final customPaint = CustomPaint(
-        painter: _CubePainter(scene),
-        size: Size(constraints.maxWidth, constraints.maxHeight),
-      );
-      return widget.interactive
-          ? GestureDetector(
-              onScaleStart: _handleScaleStart,
-              onScaleUpdate: _handleScaleUpdate,
-              child: customPaint,
-            )
-          : customPaint;
-    });
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        scene.camera.viewportWidth = constraints.maxWidth;
+        scene.camera.viewportHeight = constraints.maxHeight;
+        final customPaint = CustomPaint(
+          painter: _CubePainter(scene),
+          size: Size(constraints.maxWidth, constraints.maxHeight),
+        );
+        return widget.interactive
+            ? GestureDetector(
+                onScaleStart: _handleScaleStart,
+                onScaleUpdate: _handleScaleUpdate,
+                child: customPaint,
+              )
+            : customPaint;
+      },
+    );
   }
 }
 
 class _CubePainter extends CustomPainter {
   final Scene _scene;
+
   const _CubePainter(this._scene);
 
   @override

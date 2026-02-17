@@ -1,7 +1,7 @@
-import 'dart:ui';
 import 'package:vector_math/vector_math_64.dart';
-import 'scene.dart';
+
 import 'mesh.dart';
+import 'scene.dart';
 
 class Object {
   Object({
@@ -33,7 +33,7 @@ class Object {
 
     // load mesh from obj file
     if (fileName != null) {
-      loadObj(fileName, normalized, isAsset: isAsset).then((List<Mesh> meshes) {
+      loadObj(fileName, normalized, isAsset: isAsset).then((meshes) {
         if (meshes.length == 1) {
           this.mesh = meshes[0];
         } else if (meshes.length > 1) {

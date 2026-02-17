@@ -1,5 +1,6 @@
-import 'dart:ui';
 import 'dart:math' as math;
+import 'dart:ui';
+
 import 'package:vector_math/vector_math_64.dart';
 
 import 'material.dart';
@@ -9,6 +10,7 @@ class Light {
     position?.copyInto(this.position);
     setColor(color, ambient, diffuse, specular);
   }
+
   final Vector3 position = Vector3(0, 0, 10);
   final Vector3 ambient = Vector3.zero();
   final Vector3 diffuse = Vector3.zero();

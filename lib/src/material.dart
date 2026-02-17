@@ -1,26 +1,14 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
-import 'package:vector_math/vector_math_64.dart';
-import 'package:flutter/services.dart' show rootBundle;
-import 'package:path/path.dart' as path;
 import 'dart:ui';
 
+import 'package:flutter/services.dart' show rootBundle;
+import 'package:path/path.dart' as path;
+import 'package:vector_math/vector_math_64.dart';
+
 class Material {
-  Material()
-      : name = '',
-        ambient = Vector3.all(0.1),
-        diffuse = Vector3.all(0.8),
-        specular = Vector3.all(0.5),
-        ke = Vector3.zero(),
-        tf = Vector3.zero(),
-        mapKa = '',
-        mapKd = '',
-        mapKe = '',
-        shininess = 0,
-        ni = 0,
-        opacity = 1.0,
-        illum = 0;
+  Material() : name = '', ambient = Vector3.all(0.1), diffuse = Vector3.all(0.8), specular = Vector3.all(0.5), ke = Vector3.zero(), tf = Vector3.zero(), mapKa = '', mapKd = '', mapKe = '', shininess = 0, ni = 0, opacity = 1.0, illum = 0;
   String name;
   Vector3 ambient;
   Vector3 diffuse;
@@ -40,7 +28,7 @@ class Material {
 /// Reference：http://paulbourke.net/dataformats/mtl/
 ///
 Future<Map<String, Material>> loadMtl(String fileName, {bool isAsset = true}) async {
-  final materials = Map<String, Material>();
+  final materials = <String, Material>{};
   String data;
   try {
     if (isAsset) {
@@ -55,7 +43,7 @@ Future<Map<String, Material>> loadMtl(String fileName, {bool isAsset = true}) as
 
   Material material = Material();
   for (String line in lines) {
-    List<String> parts = line.trim().split(RegExp(r"\s+"));
+    List<String> parts = line.trim().split(RegExp(r'\s+'));
     switch (parts[0]) {
       case 'newmtl':
         material = Material();
@@ -127,21 +115,23 @@ Future<Map<String, Material>> loadMtl(String fileName, {bool isAsset = true}) as
 /// load an image from asset
 Future<Image> loadImageFromAsset(String fileName, {bool isAsset = true}) {
   final c = Completer<Image>();
-  var dataFuture;
+  Future<Uint8List> dataFuture;
   if (isAsset) {
     dataFuture = rootBundle.load(fileName).then((data) => data.buffer.asUint8List());
   } else {
     dataFuture = File(fileName).readAsBytes();
   }
-  dataFuture.then((data) {
-    instantiateImageCodec(data).then((codec) {
-      codec.getNextFrame().then((frameInfo) {
-        c.complete(frameInfo.image);
+  dataFuture
+      .then((data) {
+        instantiateImageCodec(data).then((codec) {
+          codec.getNextFrame().then((frameInfo) {
+            c.complete(frameInfo.image);
+          });
+        });
+      })
+      .catchError((error) async {
+        c.completeError(error);
       });
-    });
-  }).catchError((error) {
-    c.completeError(error);
-  });
   return c.future;
 }
 
@@ -156,7 +146,7 @@ Future<MapEntry<String, Image>?> loadTexture(Material? material, String basePath
   // try to load image from asset in subdirectories
   Image? image;
   final List<String> dirList = fileName.split(RegExp(r'[/\\]+'));
-  while (dirList.length > 0) {
+  while (dirList.isNotEmpty) {
     fileName = path.join(basePath, path.joinAll(dirList));
     try {
       image = await loadImageFromAsset(fileName, isAsset: isAsset);
@@ -169,11 +159,14 @@ Future<MapEntry<String, Image>?> loadTexture(Material? material, String basePath
 
 Future<Uint32List> getImagePixels(Image image) async {
   final c = Completer<Uint32List>();
-  image.toByteData(format: ImageByteFormat.rawRgba).then((data) {
-    c.complete(data!.buffer.asUint32List());
-  }).catchError((error) {
-    c.completeError(error);
-  });
+  await image
+      .toByteData(format: ImageByteFormat.rawRgba)
+      .then((data) {
+        c.complete(data!.buffer.asUint32List());
+      })
+      .catchError((error) async {
+        c.completeError(error);
+      });
 
   return c.future;
 }
