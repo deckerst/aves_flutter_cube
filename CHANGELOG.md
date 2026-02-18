@@ -11,7 +11,7 @@
 ## [0.0.5] - 04/11/2020
 
 - fix texture & color mode
-- add visiable & normalized & remove for object
+- add visible & normalized & remove for object
 - fix miss scene
 
 ## [0.0.4] - 03/06/2020

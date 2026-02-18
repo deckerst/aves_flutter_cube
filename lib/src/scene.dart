@@ -18,7 +18,7 @@ class Scene {
   Camera camera = Camera();
   late Object world;
   Image? texture;
-  BlendMode blendMode = BlendMode.srcOver;
+  BlendMode paintBlendMode = BlendMode.srcOver;
   BlendMode textureBlendMode = BlendMode.srcOver;
   VoidCallback? _onUpdate;
   ObjectCreatedCallback? _onObjectCreated;
@@ -85,7 +85,7 @@ class Scene {
   }
 
   void _renderObject(RenderMesh renderMesh, Object o, Matrix4 model, Matrix4 view, Matrix4 projection) {
-    if (!o.visiable) return;
+    if (!o.visible) return;
     model *= o.transform;
     final Matrix4 transform = projection * view * model;
 
@@ -99,12 +99,12 @@ class Scene {
     final int vertexCount = vertices.length;
     final Vector4 v = Vector4.identity();
     for (int i = 0; i < vertexCount; i++) {
-      // Conver Vector3 to Vector4
+      // Convert Vector3 to Vector4
       final Float64List storage3 = vertices[i].storage;
       v.setValues(storage3[0], storage3[1], storage3[2], 1.0);
       // apply "model => world => camera => perspective" transform
       v.applyMatrix4(transform);
-      // transform from homonegenous coordinates to the normalized device coordinates，
+      // transform from homogeneous coordinates to the normalized device coordinates，
       final int xIndex = (vertexOffset + i) * 2;
       final int yIndex = xIndex + 1;
       final Float64List storage4 = v.storage;
@@ -168,9 +168,9 @@ class Scene {
           b.applyMatrix4(vertexTransform);
           c.applyMatrix4(vertexTransform);
 
-          renderColors[vertexOffset + p.vertex0] = light.shading(viewPosition, a, normal, material).value;
-          renderColors[vertexOffset + p.vertex1] = light.shading(viewPosition, b, normal, material).value;
-          renderColors[vertexOffset + p.vertex2] = light.shading(viewPosition, c, normal, material).value;
+          renderColors[vertexOffset + p.vertex0] = light.shading(viewPosition, a, normal, material).toARGB32();
+          renderColors[vertexOffset + p.vertex1] = light.shading(viewPosition, b, normal, material).toARGB32();
+          renderColors[vertexOffset + p.vertex2] = light.shading(viewPosition, c, normal, material).toARGB32();
         }
       }
     } else {
@@ -179,13 +179,13 @@ class Scene {
       final List<Color> colors = o.mesh.colors;
       final int colorCount = o.mesh.vertices.length;
       if (colorCount != o.mesh.colors.length) {
-        final int colorValue = (o.mesh.texture != null) ? const Color.fromARGB(0, 0, 0, 0).value : toColor(o.mesh.material.diffuse, o.mesh.material.opacity).value;
+        final int colorValue = (o.mesh.texture != null ? const Color.fromARGB(0, 0, 0, 0) : toColor(o.mesh.material.diffuse, o.mesh.material.opacity)).toARGB32();
         for (int i = 0; i < colorCount; i++) {
           renderColors[vertexOffset + i] = colorValue;
         }
       } else {
         for (int i = 0; i < colorCount; i++) {
-          renderColors[vertexOffset + i] = colors[i].value;
+          renderColors[vertexOffset + i] = colors[i].toARGB32();
         }
       }
     }
@@ -254,14 +254,7 @@ class Scene {
     if (renderIndices.isEmpty) return;
 
     // sort the faces by z
-    renderIndices.sort((a, b) {
-      // return b.sumOfZ.compareTo(a.sumOfZ);
-      final double az = a.sumOfZ;
-      final double bz = b.sumOfZ;
-      if (bz > az) return 1;
-      if (bz < az) return -1;
-      return 0;
-    });
+    renderIndices.sort((a, b) => b.sumOfZ.compareTo(a.sumOfZ));
 
     // convert Polygon list to Uint16List
     final int indexCount = renderIndices.length;
@@ -286,11 +279,13 @@ class Scene {
 
     final paint = Paint();
     if (renderMesh.texture != null) {
-      Float64List matrix4 = Matrix4.identity().storage;
-      final shader = ImageShader(renderMesh.texture!, TileMode.mirror, TileMode.mirror, matrix4);
-      paint.shader = shader;
+      final Float64List matrix4 = Matrix4.identity().storage;
+      const tileMode = TileMode.mirror;
+      const filterQuality = FilterQuality.medium;
+      paint.shader = ImageShader(renderMesh.texture!, tileMode, tileMode, matrix4, filterQuality: filterQuality);
+      paint.filterQuality = filterQuality;
     }
-    paint.blendMode = blendMode;
+    paint.blendMode = paintBlendMode;
     canvas.drawVertices(vertices, textureBlendMode, paint);
   }
 
@@ -333,6 +328,7 @@ class RenderMesh {
     colors = Int32List(vertexCount);
     indices = List<Polygon?>.filled(faceCount, null);
   }
+
   late Float32List positions;
   late Float32List positionsZ;
   late Float32List texcoords;

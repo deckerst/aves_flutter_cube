@@ -15,7 +15,7 @@ class Object {
     List<Object>? children,
     this.backfaceCulling = true,
     this.lighting = false,
-    this.visiable = true,
+    this.visible = true,
     bool normalized = true,
     String? fileName,
     bool isAsset = true,
@@ -86,8 +86,8 @@ class Object {
   /// Enable basic lighting, default to false.
   bool lighting;
 
-  /// Is this object visiable.
-  bool visiable;
+  /// Is this object visible.
+  bool visible;
 
   /// The transformation of the object in the scene, including position, rotation, and scaling.
   final Matrix4 transform = Matrix4.identity();
